@@ -1,6 +1,6 @@
 {
-  "name": "use-state-with-callback",
-  "version": "1.0.18",
+  "name": "use-state-with-version",
+  "version": "1.0.0",
   "description": "",
   "main": "lib/index.js",
   "scripts": {
@@ -10,7 +10,7 @@
     "coverage": "nyc report --reporter=text-lcov | coveralls"
   },
   "keywords": [],
-  "author": "“Robin <hello@rwieruch.com”> (https://www.robinwieruch.de)",
+  "author": "Fstn",
   "license": "MIT",
   "peerDependencies": {
     "react": "^16.8.6",
@@ -50,10 +50,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/the-road-to-learn-react/use-state-with-callback.git"
+    "url": "git+https://github.com/fstn/use-state-with-version.git"
   },
   "bugs": {
-    "url": "https://github.com/the-road-to-learn-react/use-state-with-callback/issues"
+    "url": "https://github.com/fstn/use-state-with-version/issues"
   },
-  "homepage": "https://github.com/the-road-to-learn-react/use-state-with-callback#readme"
+  "homepage": "https://github.com/fstn/use-state-with-version#readme"
 }

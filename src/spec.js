@@ -1,67 +1,46 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { expect } from 'chai';
-import { spy } from 'sinon';
-import { mount, configure } from 'enzyme';
+import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
+import useStateWithVersion from './';
 
 configure({ adapter: new Adapter() });
 
-import useStateWithCallback, {
-  useStateWithCallbackInstant,
-} from './';
-
 const SomeComponent = () => {
-  const [count, setCount] = useStateWithCallback(0, count => {
-    if (count > 1) {
-      document.title = 'Threshold of over 1 reached.';
-    } else {
-      document.title = 'No threshold reached.';
-    }
-  });
-
+  const [user, setUser] = useStateWithVersion({ name: 'Tom' });
+  const oldUser = useMemo(() => user, []);
   return (
     <div>
-      <p>{count}</p>
+      <p>{user.name}</p>
 
-      <button type="button" onClick={() => setCount(count + 1)}>
-        Increase
+      <button type="button" onClick={() => setUser({ ...user, name: 'Bob' })}>
+        ChangeName
+      </button>
+      <button type="button" onClick={() => {
+        try {
+          setUser({ ...oldUser, name: 'Error' });
+        } catch (e) {
+          document.title = e.message;
+        }
+      }}>
+        Error
       </button>
     </div>
   );
 };
 
-const SomeOtherComponent = () => {
-  const [count, setCount] = useStateWithCallbackInstant(0, count => {
-    if (count > 1) {
-      document.title = 'Threshold of over 1 reached.';
-    } else {
-      document.title = 'No threshold reached.';
-    }
-  });
-
-  return (
-    <div>
-      <p>{count}</p>
-
-      <button type="button" onClick={() => setCount(count + 1)}>
-        Increase
-      </button>
-    </div>
-  );
-};
-
-describe('useStateWithCallback', () => {
-  it('works the same as useState, but calls a callback function', () => {
-    const wrapper = mount(<SomeComponent />);
+describe('useStateWithVersion', () => {
+  it('works the same as useState, but check version', () => {
+    const wrapper = mount(<SomeComponent/>);
 
     expect(
       wrapper
         .find('p')
         .at(0)
         .text(),
-    ).to.eql('0');
+    ).to.eql('Tom');
 
-    expect(document.title).to.eql('No threshold reached.');
+    expect(document.title).to.eql('');
 
     wrapper
       .find('button')
@@ -73,35 +52,11 @@ describe('useStateWithCallback', () => {
         .find('p')
         .at(0)
         .text(),
-    ).to.eql('1');
-
-    expect(document.title).to.eql('No threshold reached.');
+    ).to.eql('Bob');
 
     wrapper
       .find('button')
-      .at(0)
-      .simulate('click');
-
-    expect(document.title).to.eql('Threshold of over 1 reached.');
-  });
-});
-
-describe('useStateWithCallbackInstant', () => {
-  it('works the same as useState, but calls a callback function', () => {
-    const wrapper = mount(<SomeOtherComponent />);
-
-    expect(
-      wrapper
-        .find('p')
-        .at(0)
-        .text(),
-    ).to.eql('0');
-
-    expect(document.title).to.eql('No threshold reached.');
-
-    wrapper
-      .find('button')
-      .at(0)
+      .at(1)
       .simulate('click');
 
     expect(
@@ -109,15 +64,8 @@ describe('useStateWithCallbackInstant', () => {
         .find('p')
         .at(0)
         .text(),
-    ).to.eql('1');
+    ).to.eql('Bob');
 
-    expect(document.title).to.eql('No threshold reached.');
-
-    wrapper
-      .find('button')
-      .at(0)
-      .simulate('click');
-
-    expect(document.title).to.eql('Threshold of over 1 reached.');
+    expect(document.title).to.eql('OptimisticLock: existing version is more recent than old one: {"name":"Bob","__INTERNAL__VERSION":1} new one: {"name":"Error","__INTERNAL__VERSION":0}');
   });
 });

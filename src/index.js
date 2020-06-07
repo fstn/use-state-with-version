@@ -1,21 +1,19 @@
-import { useState, useEffect, useLayoutEffect } from 'react';
-
-const useStateWithCallback = (initialState, callback) => {
+import { useState } from 'react';
+/* eslint no-underscore-dangle */
+const useStateWithVersion = (initialState, initialVersion) => {
+  initialState.__INTERNAL__VERSION = initialVersion || 0;
   const [state, setState] = useState(initialState);
 
-  useEffect(() => callback(state), [state, callback]);
+  const setVersionedState = _state => {
 
-  return [state, setState];
+    if (state.__INTERNAL__VERSION > _state.__INTERNAL__VERSION) {
+      throw new Error(`OptimisticLock: existing version is more recent than old one: ${JSON.stringify(state)} \n new one: ${JSON.stringify(_state)}`);
+    }
+    _state.__INTERNAL__VERSION = _state.__INTERNAL__VERSION + 1;
+    setState(_state);
+  };
+
+  return [state, setVersionedState];
 };
 
-const useStateWithCallbackInstant = (initialState, callback) => {
-  const [state, setState] = useState(initialState);
-
-  useLayoutEffect(() => callback(state), [state, callback]);
-
-  return [state, setState];
-};
-
-export { useStateWithCallbackInstant };
-
-export default useStateWithCallback;
+export default useStateWithVersion;
